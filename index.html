@@ -1,4 +1,11 @@
 <!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>EXCE Finanças</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#0D47A1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="EXCE">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
 :root{--az:#0f3f94;--az2:#0a2c6b;--ouro:#c8961e;--bg:#f4f7fc;--card:#fff;--tx:#17233b;--mut:#66728c;--bd:#dde4f0;--lk:#0f3f94;--ok:#17803f;--er:#c0392b;--wr:#a8710c;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -154,5 +161,3 @@ async function impOFX0(rows){
  openM(`<h3>Possíveis lançamentos correspondentes</h3><p class="mu">Encontramos mais de um lançamento parecido. Confirme qual deve receber a baixa.</p>${am.map(([r,c],i)=>`<div class="card"><b>${r.tipo=='E'?'Entrada':'Saída'} ${R(r.val)}</b> em ${D(r.data)}<br><small>${esc(r.desc)}</small>${c.map(l=>`<label class="c"><input type="radio" name="a${i}" value="${l.id}"> ${esc(l.desc)} · venc. ${D(l.venc)} · ${esc(cn(l.conta))}</label>`).join('')}<label class="c"><input type="radio" name="a${i}" value="" checked> Nenhum deles: criar novo lançamento</label></div>`).join('')}<div class="bt"><button class="bp" onclick="_fim()">Confirmar importação</button></div>`)}
 setTimeout(()=>{const s=g('sp');s.style.opacity=0;setTimeout(()=>s.remove(),500)},1300);render();
 </script></body></html>
-
-
