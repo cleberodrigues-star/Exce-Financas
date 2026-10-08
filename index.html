@@ -154,3 +154,5 @@ async function impOFX0(rows){
  openM(`<h3>Possíveis lançamentos correspondentes</h3><p class="mu">Encontramos mais de um lançamento parecido. Confirme qual deve receber a baixa.</p>${am.map(([r,c],i)=>`<div class="card"><b>${r.tipo=='E'?'Entrada':'Saída'} ${R(r.val)}</b> em ${D(r.data)}<br><small>${esc(r.desc)}</small>${c.map(l=>`<label class="c"><input type="radio" name="a${i}" value="${l.id}"> ${esc(l.desc)} · venc. ${D(l.venc)} · ${esc(cn(l.conta))}</label>`).join('')}<label class="c"><input type="radio" name="a${i}" value="" checked> Nenhum deles: criar novo lançamento</label></div>`).join('')}<div class="bt"><button class="bp" onclick="_fim()">Confirmar importação</button></div>`)}
 setTimeout(()=>{const s=g('sp');s.style.opacity=0;setTimeout(()=>s.remove(),500)},1300);render();
 </script></body></html>
+
+
