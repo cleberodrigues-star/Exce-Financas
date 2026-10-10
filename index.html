@@ -37,6 +37,9 @@ const MES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto
 const C0=[['Salário','E',1,0],['Outras receitas','E',0,0],['Moradia','S',1,0],['Energia e água','S',1,0],['Alimentação','S',0,0],['Cartão de crédito','S',0,1],['Compras parceladas','S',0,1],['Saúde','S',0,0],['Transporte','S',0,0]];
 let db=null;try{db=JSON.parse(localStorage.getItem('exce')||'null')}catch(e){}
 db=db||{saldo:{},contas:C0.map(c=>({id:uid(),nome:c[0],tipo:c[1],ativa:1,rep:c[2],parc:c[3]})),lan:[],fits:[]};
+(function(){if(!db||typeof db!='object')db={saldo:{},contas:[],lan:[],fits:[]};if(!Array.isArray(db.contas))db.contas=[];if(!Array.isArray(db.lan))db.lan=[];if(!db.saldo)db.saldo={};if(!Array.isArray(db.fits))db.fits=[];
+db.contas=db.contas.filter(c=>c&&c.nome);db.contas.forEach(c=>{if(!c.id)c.id=uid();if(c.tipo!='E'&&c.tipo!='S')c.tipo=/^e/i.test(c.tipo||'')?'E':'S';if(c.ativa===undefined||c.ativa===null)c.ativa=1;c.rep=+c.rep||0;c.parc=+c.parc||0});
+['E','S'].forEach(t=>{if(!db.contas.some(c=>c.tipo==t))C0.filter(c=>c[1]==t).forEach(c=>db.contas.push({id:uid(),nome:c[0],tipo:c[1],ativa:1,rep:c[2],parc:c[3]}))})})();
 const save=()=>{try{localStorage.setItem('exce',JSON.stringify(db));localStorage.setItem('exce_ts',Date.now())}catch(e){}window._cloudSave&&window._cloudSave()};
 const now=new Date();let view='dash',F={ano:now.getFullYear(),mes:now.getMonth()+1,tipo:'',conta:'',st:'',q:'',ord:'venc',dir:1};
 const cta=id=>db.contas.find(c=>c.id==id),cn=id=>id=='PEND'?'PENDENTE DE CLASSIFICAÇÃO':(cta(id)||{nome:'—'}).nome;
@@ -91,13 +94,15 @@ function formL(id,t){const l=id?db.lan.find(x=>x.id==id):null;t=l?l.tipo:t;windo
  <label class="c"><input type="checkbox" id="fp" onchange="updF()"> Parcelar</label><div id="xp" hidden><label>Quantidade de parcelas<input type="number" id="fa" min="2" max="120" value="12"></label><label>Taxa de juros ao mês (%)<input type="number" id="fj" step="0.01" min="0" value="0"></label><label>Tipo de juros<select id="ft2"><option value="s">Simples</option><option value="c">Composto</option></select></label><small class="mu">O vencimento acima é o da 1ª parcela; as demais vencem mês a mês.</small></div>
  <small class="mu" id="hn"></small>`}
  <div class="bt"><button class="bp" onclick="saveL('${id||''}')">Salvar</button><button class="bs" onclick="closeM()">Cancelar</button></div>`);updF(l)}
-function updF(l){const t=window._t,E=t=='E',c=g('fc'),cur=c.value||(l&&l.conta)||'';
- g('lw').firstChild.textContent=E?'Data prevista de recebimento':'Data de vencimento';g('lb').firstChild.textContent=E?'Data efetiva de recebimento':'Data efetiva de pagamento';g('lq').firstChild.textContent=E?'Valor recebido':'Valor pago';
+const lt=(i,t)=>{const e=g(i);if(!e)return;const n=document.createTreeWalker(e,NodeFilter.SHOW_TEXT).nextNode();if(n)n.textContent=t;else e.insertBefore(document.createTextNode(t),e.firstChild)};
+function updF(l){try{updF0(l)}catch(e){console.error(e);const m=/:(\d+):\d+\)?\s*$/m.exec((e.stack||'').split('\n').slice(1).join('\n'));try{toast('Erro no formulário: '+e.message+(m?' (linha '+m[1]+')':''))}catch(x){}}}
+function updF0(l){const t=window._t,E=t=='E',c=g('fc'),cur=c.value||(l&&l.conta)||'';
+ lt('lw',E?'Data prevista de recebimento':'Data de vencimento');lt('lb',E?'Data efetiva de recebimento':'Data efetiva de pagamento');lt('lq',E?'Valor recebido':'Valor pago');
  c.innerHTML=(l?`<option value="PEND"${cur=='PEND'?' selected':''}>PENDENTE DE CLASSIFICAÇÃO</option>`:'<option value="">Escolha…</option>')+db.contas.filter(x=>x.tipo==t&&(x.ativa||x.id==cur)).sort(abc).map(x=>`<option value="${x.id}"${x.id==cur?' selected':''}>${esc(x.nome)}</option>`).join('');
  if(!g('fr'))return;const a=cta(c.value),cr=a&&a.rep,cp=a&&t=='S'&&a.parc;
  if(!cr)g('fr').checked=false;if(!cp)g('fp').checked=false;g('fr').disabled=!cr||g('fp').checked;g('fp').disabled=!cp||g('fr').checked;
- g('xr').hidden=!g('fr').checked;g('xp').hidden=!g('fp').checked;g('lv').firstChild.textContent=g('fp').checked?'Valor total da compra':'Valor do lançamento';
- g('hn').textContent=!a?'Escolha a conta para ver se permite repetir ou parcelar.':'Repetir: '+(cr?'permitido':'não permitido')+(E?'. Entradas não parcelam.':' · Parcelar: '+(cp?'permitido':'não permitido'))+'. Repetir e parcelar não podem ser usados juntos.'}
+ g('xr').hidden=!g('fr').checked;g('xp').hidden=!g('fp').checked;lt('lv',g('fp').checked?'Valor total da compra':'Valor do lançamento');
+ const hn=g('hn');if(hn)hn.textContent=!a?'Escolha a conta para ver se permite repetir ou parcelar.':'Repetir: '+(cr?'permitido':'não permitido')+(E?'. Entradas não parcelam.':' · Parcelar: '+(cp?'permitido':'não permitido'))+'. Repetir e parcelar não podem ser usados juntos.'}
 async function saveL(id){const v=k=>g(k).value,t=window._t,ct=v('fc'),val=+v('fv');
  if(!v('fd')||!v('fs').trim()||!(val>0)||!v('fw'))return toast('Preencha data, descrição, valor e vencimento.');if(!ct)return toast('Escolha a classificação no Plano de Contas.');
  const bx=+v('fq')>0?{dataBx:v('fb')||hoje(),valBx:+v('fq')}:{dataBx:'',valBx:0};
