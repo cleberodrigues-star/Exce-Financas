@@ -108,8 +108,8 @@ function updF0(l){const t=window._t,E=t=='E',c=g('fc'),cur=c.value||(l&&l.conta)
 async function saveL(id){const v=k=>g(k).value,t=window._t,ct=v('fc'),val=+v('fv');
  if(!v('fd')||!v('fs').trim()||!(val>0)||!v('fw'))return toast('Preencha data, descrição, valor e vencimento.');if(!ct)return toast('Escolha a classificação no Plano de Contas.');
  const fqv=+v('fq')||(v('fb')?val:0),bx=fqv>0?{dataBx:v('fb')||hoje(),valBx:fqv}:{dataBx:'',valBx:0};
- if(id){const l=db.lan.find(x=>x.id==id),old=l.venc;let sc='one';if(l.grp){sc=await ask('Aplicar alteração somente neste lançamento ou também aos próximos lançamentos relacionados?',[['one','Somente neste','bp'],['next','Também aos próximos','bs'],['x','Cancelar','bs']]);if(sc=='x')return}
-  Object.assign(l,{data:v('fd'),desc:v('fs').trim(),valor:val,venc:v('fw'),conta:ct},bx);
+ if(id){const l=db.lan.find(x=>x.id==id),old=l.venc,dd={data:v('fd'),desc:v('fs').trim(),valor:val,venc:v('fw'),conta:ct};let sc='one';if(l.grp){sc=await ask('Aplicar alteração somente neste lançamento ou também aos próximos lançamentos relacionados?',[['one','Somente neste','bp'],['next','Também aos próximos','bs'],['x','Cancelar','bs']]);if(sc=='x')return}
+  Object.assign(l,dd,bx);
   if(sc=='next')db.lan.filter(x=>x.grp==l.grp&&x.id!=l.id&&x.venc>old).forEach(x=>Object.assign(x,{desc:l.desc,valor:l.valor,conta:ct}));
  }else{const n=[],a=cta(ct);let N=1,gp='';
   if(g('fp')&&g('fp').checked){N=Math.max(2,+v('fa')),gp=uid();const i=(+v('fj')||0)/100;let T=val;
